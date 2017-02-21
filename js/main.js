@@ -15,18 +15,18 @@
 					var getBSONP=function(url,callback){
 						return $.jsonp({
 							url:url,
-							cathe:true,
-							callback:'duokan_fiction_chapter',
-							success:function(result){
-							decodeURICompomentdddd
+							cache :true,
+							callback :"duokan_fiction_chapter",
+							success:function(result){							
 								var data=$.base64.decode(result);								
-								var json=decodeURICompoment(escape(data));
-								callback(data);
-							}
+								var json=decodeURIComponent(escape(data));
+								callback(json);
+								}
 
 						})
 
 					}
+
 					
 					return {
 						getBSONP:getBSONP,
@@ -47,7 +47,8 @@
 				};				
 			var Win=$(window);
 			var Doc=$(document);
-			var default_fontsize=Util.StorgeGetter('font_size');		
+			var default_fontsize=Util.StorgeGetter('font_size');
+			var RootContainer=$('#fiction_container');	
 			default_fontsize=parseInt(default_fontsize);
 			if(!default_fontsize){
 				default_fontsize=14;
@@ -64,10 +65,10 @@
 
 			function ReaderModel(){
 				var Chapter_id;
-				var init= function(){
+				var init= function(UIcallback){
 					getFictionInfo(function(){
-						getCurrentChapter(Chapter_id,function(){
-
+						getCurrentChapter(Chapter_id,function(data){
+							UIcallback&&UIcallback(data);
 						});
 					})
 				}
@@ -78,7 +79,7 @@
 						callback&& callback();
 					}, 'json');
 					}
-					var getCurrentChapter =function(chapter_id,data){
+					var getCurrentChapter =function(chapter_id,callback){
 						$.get('data/data'+chapter_id+'.json',function(data){
 							if(data.result ==0){
 								var url=data.jsonp;
@@ -94,10 +95,21 @@
 					}
 
 				}
-				function ReaderFrame(){
+
+				function ReaderBaseFrame(container){
 					// TODO 渲染结构
+  					function parseChapterData(jsonData){
+  						var jsonObj= JSON.parse(jsonData);
+  						var html='<h4>'+jsonObj.t + '<h4>';
+  						for (var i = 0; i < jsonObj.p.length; i++) {
 
-
+  							html+="<p>"+jsonObj.p[i]+"<p>";					
+  						}
+  						return html;
+   					}
+   					return function(data){
+   						container.html(parseChapterData(data));
+   					}
 				}
 				function EventHandler(){						
 
@@ -224,9 +236,13 @@
 			function main(){
 				//整个项目的入口函数
 				var readerModel = ReaderModel();
-				readerModel.init();
+				var readerUI=ReaderBaseFrame(RootContainer);
+				readerModel.init(function(data){
+					readerUI(data);
+				});
+
 				EventHandler();
-				alert(11);
+				
 				
 			}
 			main();
