@@ -46,6 +46,7 @@
 							
 				};				
 			var Win=$(window);
+			var readerModel;
 			var Doc=$(document);
 			var default_fontsize=Util.StorgeGetter('font_size');
 			var RootContainer=$('#fiction_container');	
@@ -65,6 +66,7 @@
 
 			function ReaderModel(){
 				var Chapter_id;
+				var ChapterTotal;
 				var init= function(UIcallback){
 					getFictionInfo(function(){
 						getCurrentChapter(Chapter_id,function(data){
@@ -76,6 +78,7 @@
 					var getFictionInfo=function(callback){
 					$.get('data/chapter.json', function(data){
 						Chapter_id=data.chapters[1].chapter_id;
+						ChapterTotal=data.chapters.length;
 						callback&& callback();
 					}, 'json');
 					}
@@ -90,8 +93,26 @@
 							}
 						},'json')
 					}
+					var prevChapter =function(UIcallback){
+						Chapter_id=parseInt(Chapter_id,10);
+						if(Chapter_id==0){
+							return;
+						}
+						Chapter_id -= 1;
+						getCurrentChapter(Chapter_id,UIcallback);
+					}
+					var nextChapter=function(UIcallback){
+						Chapter_id=parseInt(Chapter_id,10);
+						if(Chapter_id==ChapterTotal){
+							return;
+						}
+						Chapter_id += 1;
+						getCurrentChapter(Chapter_id,UIcallback);
+					}
 					return {
-						init:init
+						init:init,
+						prevChapter:prevChapter,
+						nextChapter:nextChapter
 					}
 
 				}
@@ -226,6 +247,16 @@
 				Util.StorgeSetter('background_color',background_color);
 
 			});
+			$('#prev_button').click(function(){
+			//TODO 新获得章节数据并渲染
+			readerModel.prevChapter();
+			});
+			$('#next_button').click(function(){
+				readerModel.nextChapter(function(data){
+					readerUI(data);
+				});
+			});
+
 					
 					Win.scroll(function(){
 						
@@ -233,10 +264,11 @@
 						Dom.bottom.hide();
 					});
 				}
+				var readerUI;
 			function main(){
 				//整个项目的入口函数
-				var readerModel = ReaderModel();
-				var readerUI=ReaderBaseFrame(RootContainer);
+				readerModel = ReaderModel();
+				readerUI=ReaderBaseFrame(RootContainer);
 				readerModel.init(function(data){
 					readerUI(data);
 				});
