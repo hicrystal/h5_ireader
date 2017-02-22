@@ -62,7 +62,18 @@
 			}
 			
 			$('body').css('background',background_color);
+			function main(){
+				//整个项目的入口函数
+				readerModel = ReaderModel();
+				readerUI=ReaderBaseFrame(RootContainer);
+				readerModel.init(function(data){
+					readerUI(data);
+				});
 
+				EventHandler();
+				
+				
+			}
 
 			function ReaderModel(){
 				var Chapter_id;
@@ -103,7 +114,7 @@
 					}
 					var nextChapter=function(UIcallback){
 						Chapter_id=parseInt(Chapter_id,10);
-						if(Chapter_id==ChapterTotal){
+						if(Chapter_id==ChapterTotal.length){
 							return;
 						}
 						Chapter_id += 1;
@@ -265,17 +276,6 @@
 					});
 				}
 				var readerUI;
-			function main(){
-				//整个项目的入口函数
-				readerModel = ReaderModel();
-				readerUI=ReaderBaseFrame(RootContainer);
-				readerModel.init(function(data){
-					readerUI(data);
-				});
-
-				EventHandler();
-				
-				
-			}
+			
 			main();
 			})();
