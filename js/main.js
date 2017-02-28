@@ -2,13 +2,13 @@
 	//localStorge 储存调用
 				
 				var Util=(function(){
-					var StorgeGetter=function(key){
+					var StorageGetter=function(key){
            
 						return localStorage.getItem(prefix + key);
 
 
 					}
-					var StorgeSetter=function(key,val){
+					var StorageSetter=function(key,val){
 						return localStorage.setItem(prefix + key,val);
 
 					}
@@ -30,8 +30,8 @@
 					
 					return {
 						getBSONP:getBSONP,
-						StorgeGetter:StorgeGetter,
-						StorgeSetter:StorgeSetter
+						StorageGetter:StorageGetter,
+						StorageSetter:StorageSetter
 					}
 
 				})();
@@ -48,7 +48,7 @@
 			var Win=$(window);
 			var readerModel;
 			var Doc=$(document);
-			var default_fontsize=Util.StorgeGetter('font_size');
+			var default_fontsize=Util.StorageGetter('font_size');
 			var RootContainer=$('#fiction_container');	
 			default_fontsize=parseInt(default_fontsize);
 			if(!default_fontsize){
@@ -56,7 +56,7 @@
 			}
 			$('#fiction_container').css('font-size',default_fontsize);
 
-			var background_color=Util.StorgeGetter('background_color');			
+			var background_color=Util.StorageGetter('background_color');			
 			if (!background_color) {
 				background_color=$('.bk-container').css('background');
 			}
@@ -78,6 +78,14 @@
 			function ReaderModel(){
 				var Chapter_id;
 				var ChapterTotal;
+				var Fiction_id ;
+				
+						Chapter_id = parseInt(Util.StorageGetter( 'last_chapter'),10);
+					
+/*
+					if (Chapter_id==null) {
+						Chapter_id = 1;
+					}*/
 				var init= function(UIcallback){
 					getFictionInfo(function(){
 						getCurrentChapter(Chapter_id,function(data){
@@ -95,7 +103,7 @@
 					}
 					var getCurrentChapter =function(chapter_id,callback){
 						$.get('data/data'+chapter_id+'.json',function(data){
-							if(data.result ==0){
+							if(data.result == 0){
 								var url=data.jsonp;
 								Util.getBSONP(url,function(data){
 									callback && callback(data);
@@ -111,14 +119,16 @@
 						}
 						Chapter_id -= 1;
 						getCurrentChapter(Chapter_id,UIcallback);
+						Util.StorageSetter(Fiction_id + 'last_chapter', Chapter_id);
 					}
 					var nextChapter=function(UIcallback){
 						Chapter_id=parseInt(Chapter_id,10);
-						if(Chapter_id==ChapterTotal.length){
+						if(Chapter_id==ChapterTotal){
 							return;
 						}
 						Chapter_id += 1;
 						getCurrentChapter(Chapter_id,UIcallback);
+						Util.StorageSetter('last_chapter', Chapter_id);
 					}
 					return {
 						init:init,
@@ -168,14 +178,14 @@
 							background_color='black';
 							$('body').css('background',background_color);
 							$('.m-day').show();
-            			    Util.StorgeSetter('background_color',background_color);
+            			    Util.StorageSetter('background_color',background_color);
 						}
 						else {
 								$('.m-night').show();
 								$('body').css('background',"#e9dfc7");
 								$('.m-day').hide();
 								background_color="#e9dfc7";
-								Util.StorgeSetter('background_color',background_color);
+								Util.StorageSetter('background_color',background_color);
 						}		
 
 
@@ -206,7 +216,7 @@
 				}				
 				default_fontsize+=1;
 				$('#fiction_container').css('font-size',default_fontsize);
-				Util.StorgeSetter('font_size',default_fontsize);
+				Util.StorageSetter('font_size',default_fontsize);
 			});
 
 
@@ -218,49 +228,52 @@
 				}
 				default_fontsize-=1;
 				$('#fiction_container').css('font-size',default_fontsize);
-				Util.StorgeSetter('font_size',default_fontsize);
+				Util.StorageSetter('font_size',default_fontsize);
 			});
 
 			$('.bk-container:nth-child(2)').click(function(){
 				background_color='#f7eee5';
 				$('body').css('background',background_color);
-				Util.StorgeSetter('background_color',background_color);
+				Util.StorageSetter('background_color',background_color);
 
 			});
 			$('.bk-container:nth-child(3)').click(function(){
 				background_color='#e9dfc7';
 				$('body').css('background',background_color);
-				Util.StorgeSetter('background_color',background_color);
+				Util.StorageSetter('background_color',background_color);
 
 			});
 			$('.bk-container:nth-child(4)').click(function(){
 				background_color='#a4a4a4';
 				$('body').css('background',background_color);
-				Util.StorgeSetter('background_color',background_color);
+				Util.StorageSetter('background_color',background_color);
 
 			});
 			$('.bk-container:nth-child(5)').click(function(){
 				background_color='#cdefce';
 				$('body').css('background',background_color);
-				Util.StorgeSetter('background_color',background_color);
+				Util.StorageSetter('background_color',background_color);
 
 			});
 			$('.bk-container:nth-child(6)').click(function(){
 				background_color='rgba(255,255,255,0.7)';
 				$('body').css('background',background_color);
-				Util.StorgeSetter('background_color',background_color);
+				Util.StorageSetter('background_color',background_color);
 
 			});
 			$('.bk-container:nth-child(7)').click(function(){
 				background_color='#000';
 				console.log(background_color);
 				$('body').css('background',background_color);
-				Util.StorgeSetter('background_color',background_color);
+				Util.StorageSetter('background_color',background_color);
 
 			});
 			$('#prev_button').click(function(){
 			//TODO 新获得章节数据并渲染
-			readerModel.prevChapter();
+			readerModel.prevChapter(function(data){
+					readerUI(data);
+				});
+
 			});
 			$('#next_button').click(function(){
 				readerModel.nextChapter(function(data){
