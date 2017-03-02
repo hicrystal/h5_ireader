@@ -54,7 +54,7 @@
 			if(!default_fontsize){
 				default_fontsize=14;
 			}
-			$('#fiction_container').css('font-size',default_fontsize);
+			$('p').css('font-size',default_fontsize);
 
 			var background_color=Util.StorageGetter('background_color');			
 			if (!background_color) {
@@ -80,12 +80,8 @@
 				var ChapterTotal;
 				var Fiction_id ;
 				
-						Chapter_id = parseInt(Util.StorageGetter( 'last_chapter'),10);
 					
-/*
-					if (Chapter_id==null) {
-						Chapter_id = 1;
-					}*/
+					
 				var init= function(UIcallback){
 					getFictionInfo(function(){
 						getCurrentChapter(Chapter_id,function(data){
@@ -96,7 +92,10 @@
 					//跟服务器端的交互
 					var getFictionInfo=function(callback){
 					$.get('data/chapter.json', function(data){
+						Chapter_id = parseInt(Util.StorageGetter( 'last_chapter'),10);
+						if(!Chapter_id){
 						Chapter_id=data.chapters[1].chapter_id;
+				}
 						ChapterTotal=data.chapters.length;
 						callback&& callback();
 					}, 'json');
@@ -119,7 +118,7 @@
 						}
 						Chapter_id -= 1;
 						getCurrentChapter(Chapter_id,UIcallback);
-						Util.StorageSetter(Fiction_id + 'last_chapter', Chapter_id);
+						Util.StorageSetter( 'last_chapter', Chapter_id);
 					}
 					var nextChapter=function(UIcallback){
 						Chapter_id=parseInt(Chapter_id,10);
@@ -215,7 +214,7 @@
 					return;
 				}				
 				default_fontsize+=1;
-				$('#fiction_container').css('font-size',default_fontsize);
+				$('p').css('font-size',default_fontsize);
 				Util.StorageSetter('font_size',default_fontsize);
 			});
 
@@ -227,7 +226,7 @@
 					return;
 				}
 				default_fontsize-=1;
-				$('#fiction_container').css('font-size',default_fontsize);
+				$('p').css('font-size',default_fontsize);
 				Util.StorageSetter('font_size',default_fontsize);
 			});
 
